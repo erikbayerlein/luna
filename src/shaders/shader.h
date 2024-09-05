@@ -18,15 +18,13 @@ public:
         // 1.0 declare shaders
         vShaderCode = "#version 330 core\n"
           "layout (location = 0) in vec3 aPos;\n" // the position variable has attribute position 0
-          "layout (location = 1) in vec3 aColor;\n" // the color variable has attribute position 1
-          "layout (location = 2) in vec2 aTexCoord;\n" // the color variable has attribute position 1
-          "out vec3 ourColor;\n" // the color variable has attribute position 1
+          "layout (location = 1) in vec2 aTexCoord;\n" // the color variable has attribute position 1
           "out vec2 TexCoord;\n" // the color variable has attribute position 1
+          "uniform mat4 transform;\n" // the color variable has attribute position 1
           "void main()\n"
           "{\n"
-          "   gl_Position = vec4(aPos, 1.0);\n"
-          "   ourColor = aColor;\n" // set ourColor to the input color we got from the vertex data
-          "   TexCoord = aTexCoord;\n" // set ourColor to the input color we got from the vertex data
+          "   gl_Position = transform * vec4(aPos, 1.0);\n"
+          "   TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n" // set ourColor to the input color we got from the vertex data
           "}\0";
 
         fShaderCode = "#version 330 core\n"
@@ -37,7 +35,7 @@ public:
           "uniform sampler2D texture2;\n" // a way to pass data from our app on the CPU to the shaders on the GPU
           "void main()\n"
           "{\n"
-          "   FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.4);\n"
+          "   FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.1);\n"
           "}\n\0";
 
         // 2. compile shaders
