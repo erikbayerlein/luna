@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE dependencies/include)
+target_include_directories(${PROJECT_NAME} PRIVATE /include)
 
 find_package(glfw3 REQUIRED)
 
