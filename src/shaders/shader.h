@@ -8,6 +8,11 @@
 #include <string>
 #include <iostream>
 
+enum Type {
+  COLOR,
+  LIGHT
+};
+
 
 class Shader {
 public:
@@ -15,30 +20,91 @@ public:
 
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
-    Shader() {
-      // 1.0 declare shaders
-      vShaderCode = "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n" // the position variable has attribute position 0
-        "layout (location = 1) in vec2 aTexCoord;\n" // the color variable has attribute position 1
-        "out vec2 TexCoord;\n" // the color variable has attribute position 1
-        "uniform mat4 model;\n" // the color variable has attribute position 1
-        "uniform mat4 view;\n" // the color variable has attribute position 1
-        "uniform mat4 projection;\n" // the color variable has attribute position 1
-        "void main()\n"
-        "{\n"
-        "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-        "   TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n" // set ourColor to the input color we got from the vertex data
-        "}\0";
+    Shader(Type shaderType) {
+      if(shaderType == COLOR) {
+        // 1.0 declare shaders
+        vShaderCode = "#version 330 core\n"
+          "layout (location = 0) in vec3 aPos;\n"
+          "layout (location = 1) in vec3 aNormal;\n"
 
-      fShaderCode = "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "in vec2 TexCoord;\n" // a way to pass data from our app on the CPU to the shaders on the GPU
-        "uniform sampler2D texture1;\n" // a way to pass data from our app on the CPU to the shaders on the GPU
-        "uniform sampler2D texture2;\n" // a way to pass data from our app on the CPU to the shaders on the GPU
-        "void main()\n"
-        "{\n"
-        "   FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.1);\n"
-        "}\n\0";
+          "out vec3 Normal;\n"
+          "out vec3 FragPos;\n"
+
+          "uniform mat4 model;\n"
+          "uniform mat4 view;\n"
+          "uniform mat4 projection;\n"
+
+          "void main()\n"
+          "{\n"
+          "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
+          "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
+          "   gl_Position = projection * view * vec4(FragPos, 1.0);\n"
+          "}\0";
+
+        fShaderCode = "#version 330 core\n"
+          "struct Material {\n"
+          "   vec3 ambient;\n"
+          "   vec3 diffuse;\n"
+          "   vec3 specular;\n"
+          "   float shininess;\n"
+          "};\n"
+
+          "struct Light {\n"
+          "   vec3 ambient;\n"
+          "   vec3 diffuse;\n"
+          "   vec3 specular;\n"
+          "   vec3 position;\n"
+          "};\n"
+
+          "out vec4 FragColor;\n"
+
+          "in vec3 Normal;\n"
+          "in vec3 FragPos;\n"
+
+          "uniform Light light;\n"
+          "uniform Material material;\n"
+          "uniform vec3 objectColor;\n"
+          "uniform vec3 lightColor;\n"
+          "uniform vec3 lightPos;\n"
+          "uniform vec3 viewPos;\n"
+
+          "void main()\n"
+          "{\n"
+          // ambient
+          "   vec3 ambient = light.ambient * material.ambient;\n"
+          // diffuse
+          "   vec3 norm = normalize(Normal);\n"
+          "   vec3 lightDir = normalize(lightPos - FragPos);\n"
+          "   float diff = max(dot(norm, lightDir), 0.0);\n"
+          "   vec3 diffuse = light.diffuse * (diff * material.diffuse);\n"
+          // specular
+          "   vec3 viewDir = normalize(viewPos - FragPos);\n"
+          "   vec3 reflectDir = reflect(-lightDir, norm);\n"
+          "   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);\n"
+          "   vec3 specular = light.specular * (spec * material.specular);\n"
+
+          "   vec3 result = ambient + diffuse + specular;\n"
+          "   FragColor = vec4(result, 1.0);\n"
+          "}\0";
+      } else {
+        // 1.0 declare shaders
+        vShaderCode = "#version 330 core\n"
+          "layout (location = 0) in vec3 aPos;\n"
+          "uniform mat4 model;\n"
+          "uniform mat4 view;\n"
+          "uniform mat4 projection;\n"
+          "void main()\n"
+          "{\n"
+          "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+          "}\0";
+
+        fShaderCode = "#version 330 core\n"
+          "out vec4 FragColor;\n"
+          "void main()\n"
+          "{\n"
+          "   FragColor = vec4(1.0);\n"
+          "}\0";
+      }
 
       // 2. compile shaders
       unsigned int vertex, fragment;
@@ -88,6 +154,16 @@ public:
     void setMat4(const std::string &name, glm::mat4 &value) const
     { 
       glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    }
+    // ------------------------------------------------------------------------
+    void setVec3(const std::string &name, float x, float y, float z) const
+    { 
+      glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z); 
+    }
+    // ------------------------------------------------------------------------
+    void setVec3(const std::string &name, glm::vec3 &value) const
+    { 
+      glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]); 
     }
 
 private:
