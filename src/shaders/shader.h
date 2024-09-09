@@ -9,8 +9,8 @@
 #include <iostream>
 
 enum Type {
-  COLOR,
-  LIGHT
+  OBJECT,
+  LIGHTSOURCE
 };
 
 
@@ -21,14 +21,16 @@ public:
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
     Shader(Type shaderType) {
-      if(shaderType == COLOR) {
+      if(shaderType == OBJECT) {
         // 1.0 declare shaders
         vShaderCode = "#version 330 core\n"
           "layout (location = 0) in vec3 aPos;\n"
           "layout (location = 1) in vec3 aNormal;\n"
+          "layout (location = 2) in vec2 aTexCoords;\n"
 
           "out vec3 Normal;\n"
           "out vec3 FragPos;\n"
+          "out vec2 TexCoords;\n"
 
           "uniform mat4 model;\n"
           "uniform mat4 view;\n"
@@ -38,13 +40,13 @@ public:
           "{\n"
           "   FragPos = vec3(model * vec4(aPos, 1.0));\n"
           "   Normal = mat3(transpose(inverse(model))) * aNormal;\n"
+          "   TexCoords = aTexCoords;\n"
           "   gl_Position = projection * view * vec4(FragPos, 1.0);\n"
           "}\0";
 
         fShaderCode = "#version 330 core\n"
           "struct Material {\n"
-          "   vec3 ambient;\n"
-          "   vec3 diffuse;\n"
+          "   sampler2D diffuse;\n"
           "   vec3 specular;\n"
           "   float shininess;\n"
           "};\n"
@@ -58,29 +60,27 @@ public:
 
           "out vec4 FragColor;\n"
 
-          "in vec3 Normal;\n"
           "in vec3 FragPos;\n"
+          "in vec3 Normal;\n"
+          "in vec2 TexCoords;\n"
 
           "uniform Light light;\n"
           "uniform Material material;\n"
-          "uniform vec3 objectColor;\n"
-          "uniform vec3 lightColor;\n"
-          "uniform vec3 lightPos;\n"
           "uniform vec3 viewPos;\n"
 
           "void main()\n"
           "{\n"
           // ambient
-          "   vec3 ambient = light.ambient * material.ambient;\n"
+          "   vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;\n"
           // diffuse
           "   vec3 norm = normalize(Normal);\n"
-          "   vec3 lightDir = normalize(lightPos - FragPos);\n"
+          "   vec3 lightDir = normalize(light.position - FragPos);\n"
           "   float diff = max(dot(norm, lightDir), 0.0);\n"
-          "   vec3 diffuse = light.diffuse * (diff * material.diffuse);\n"
+          "   vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;\n"
           // specular
           "   vec3 viewDir = normalize(viewPos - FragPos);\n"
           "   vec3 reflectDir = reflect(-lightDir, norm);\n"
-          "   float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128);\n"
+          "   float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);\n"
           "   vec3 specular = light.specular * (spec * material.specular);\n"
 
           "   vec3 result = ambient + diffuse + specular;\n"
