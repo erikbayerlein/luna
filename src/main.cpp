@@ -8,6 +8,7 @@
 
 #include "shaders/shader.h"
 #include "camera/camera.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 #include <iostream>
 
@@ -16,6 +17,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 unsigned int loadTexture(char const *path);
+std::vector<float> loadObjModel(const std::string &path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -75,70 +77,28 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
   Shader lightingShader(OBJECT);
   Shader lightCubeShader(LIGHTSOURCE);
 
-  // set up vertex data (and buffer(s)) and configure vertex attributes
-  // ------------------------------------------------------------------
-  float vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-  };
+  
+  std::vector<float> vertices = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/monkey.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
+  unsigned int VBO, VAO;
+  glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(cubeVAO);
-  // position attribute
+  glBindVertexArray(VAO);
+  // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  // normal attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-  // texture attribute
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
   // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
@@ -209,9 +169,11 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
+    size_t vertexCount = vertices.size()/8;
+
     // render the cube
-    glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
 
     // also draw the lamp object
     lightCubeShader.use();
@@ -223,7 +185,7 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
     lightCubeShader.setMat4("model", model);
 
     glBindVertexArray(lightCubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
 
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -234,7 +196,7 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &VAO);
     glDeleteVertexArrays(1, &lightCubeVAO);
     glDeleteBuffers(1, &VBO);
 
@@ -338,4 +300,68 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   // make sure the viewport matches the new window dimensions; note that width and 
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+}
+
+std::vector<float> loadObjModel(const std::string& path) {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
+
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str());
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+
+  if (!ret) {
+    std::cerr << "Failed to load/parse .obj file!" << std::endl;
+    return {};
+  }
+
+  std::vector<float> vertices;
+  for (const auto& shape : shapes) {
+    for (const auto& index : shape.mesh.indices) {
+      // Vertex positions
+      tinyobj::real_t vx = attrib.vertices[3 * index.vertex_index + 0];
+      tinyobj::real_t vy = attrib.vertices[3 * index.vertex_index + 1];
+      tinyobj::real_t vz = attrib.vertices[3 * index.vertex_index + 2];
+      vertices.push_back(vx);
+      vertices.push_back(vy);
+      vertices.push_back(vz);
+
+      // Normals (if present)
+      if (index.normal_index >= 0) {
+        tinyobj::real_t nx = attrib.normals[3 * index.normal_index + 0];
+        tinyobj::real_t ny = attrib.normals[3 * index.normal_index + 1];
+        tinyobj::real_t nz = attrib.normals[3 * index.normal_index + 2];
+        vertices.push_back(nx);
+        vertices.push_back(ny);
+        vertices.push_back(nz);
+      } else {
+        // Fallback if normals are missing
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+
+      // Texture coordinates (if present)
+      if (index.texcoord_index >= 0) {
+        tinyobj::real_t tx = attrib.texcoords[2 * index.texcoord_index + 0];
+        tinyobj::real_t ty = attrib.texcoords[2 * index.texcoord_index + 1];
+        vertices.push_back(tx);
+        vertices.push_back(ty);
+      } else {
+        // Fallback if texture coordinates are missing
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+    }
+  }
+
+  return vertices;
 }
