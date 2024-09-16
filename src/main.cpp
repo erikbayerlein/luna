@@ -7,7 +7,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shaders/shader.h"
-#include "camera/camera.h"
+#include "camera/Camera.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 #include <iostream>
 
@@ -16,6 +17,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 unsigned int loadTexture(char const *path);
+std::vector<float> loadObjModel(const std::string &path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -75,87 +77,254 @@ int main() {
   Shader lightingShader(OBJECT);
   Shader lightCubeShader(LIGHTSOURCE);
 
-  // set up vertex data (and buffer(s)) and configure vertex attributes
-  // ------------------------------------------------------------------
-  float vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+  // ------------------------------------------ water ------------------------------------------ //
 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-  };
+  std::vector<float> water = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/water.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
-  glGenBuffers(1, &VBO);
+  unsigned int waterVBO, waterVAO;
+  glGenVertexArrays(1, &waterVAO);
+  glGenBuffers(1, &waterVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
+  glBufferData(GL_ARRAY_BUFFER, water.size() * sizeof(float), &water[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(cubeVAO);
-  // position attribute
+  glBindVertexArray(waterVAO);
+  // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
-  // normal attribute
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
-  // texture attribute
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-  unsigned int lightCubeVAO;
-  glGenVertexArrays(1, &lightCubeVAO);
-  glBindVertexArray(lightCubeVAO);
-
-  // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it;
-  // the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMap = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/luna.jpeg");
+  unsigned int diffuseMapwater = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/water.jpeg");
+
+
+
+
+
+
+  // ------------------------------------------ dirt ------------------------------------------ //
+
+  std::vector<float> dirt = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/dirt.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int dirtVBO, dirtVAO;
+  glGenVertexArrays(1, &dirtVAO);
+  glGenBuffers(1, &dirtVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, dirtVBO);
+  glBufferData(GL_ARRAY_BUFFER, dirt.size() * sizeof(float), &dirt[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(dirtVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // load textures (we now use a utility function to keep the code more organized)
+  // -----------------------------------------------------------------------------
+  unsigned int diffuseMapdirt = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/dirt.jpg");
+
+
+
+
+
+  // ------------------------------------------ grass ------------------------------------------ //
+
+  std::vector<float> grass = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/grass.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int grassVBO, grassVAO;
+  glGenVertexArrays(1, &grassVAO);
+  glGenBuffers(1, &grassVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+  glBufferData(GL_ARRAY_BUFFER, grass.size() * sizeof(float), &grass[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(grassVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // load textures (we now use a utility function to keep the code more organized)
+  // -----------------------------------------------------------------------------
+  unsigned int diffuseMapgrass = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/grass.jpg");
+
+
+
+
+
+  // ------------------------------------------ stone ------------------------------------------ //
+
+  std::vector<float> stone = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/stone.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int stoneVBO, stoneVAO;
+  glGenVertexArrays(1, &stoneVAO);
+  glGenBuffers(1, &stoneVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, stoneVBO);
+  glBufferData(GL_ARRAY_BUFFER, stone.size() * sizeof(float), &stone[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(stoneVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // load textures (we now use a utility function to keep the code more organized)
+  // -----------------------------------------------------------------------------
+  unsigned int diffuseMapstone = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/stone.jpg");
+
+
+
+
+
+  // ------------------------------------------ wood ------------------------------------------ //
+
+  std::vector<float> wood = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/wood.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int woodVBO, woodVAO;
+  glGenVertexArrays(1, &woodVAO);
+  glGenBuffers(1, &woodVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, woodVBO);
+  glBufferData(GL_ARRAY_BUFFER, wood.size() * sizeof(float), &wood[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(woodVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // load textures (we now use a utility function to keep the code more organized)
+  // -----------------------------------------------------------------------------
+  unsigned int diffuseMapwood = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/wood.jpeg");
+
+
+
+
+
+  // ------------------------------------------ bridge ------------------------------------------ //
+
+  std::vector<float> bridge = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/bridge.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int bridgeVBO, bridgeVAO;
+  glGenVertexArrays(1, &bridgeVAO);
+  glGenBuffers(1, &bridgeVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, bridgeVBO);
+  glBufferData(GL_ARRAY_BUFFER, bridge.size() * sizeof(float), &bridge[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(bridgeVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+
+
+  // ------------------------------------------ leaves ------------------------------------------ //
+
+  std::vector<float> leaves = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/leaves.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int leavesVBO, leavesVAO;
+  glGenVertexArrays(1, &leavesVAO);
+  glGenBuffers(1, &leavesVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, leavesVBO);
+  glBufferData(GL_ARRAY_BUFFER, leaves.size() * sizeof(float), &leaves[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(leavesVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+  // load textures (we now use a utility function to keep the code more organized)
+  // -----------------------------------------------------------------------------
+  unsigned int diffuseMapleaves = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/leaves.jpg");
+
+
+
+  // ------------------------------------------ sun ------------------------------------------ //
+  std::vector<float> sun = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/sun.obj");
+
+  unsigned int sunVAO, sunVBO;
+  glGenVertexArrays(1, &sunVAO);
+  glGenBuffers(1, &sunVBO);
+
+  glBindVertexArray(sunVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, sunVBO);
+  glBufferData(GL_ARRAY_BUFFER, sun.size() * sizeof(float), &sun[0], GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+
+
+
+
+  glEnable(GL_CULL_FACE);
+
 
   // shader configuration
   // --------------------
@@ -178,7 +347,7 @@ int main() {
 
     // render
     // ------
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.902f, 0.945f, 0.847f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // be sure to activate shader when setting uniforms/drawing objects
@@ -205,25 +374,113 @@ int main() {
     glm::mat4 model = glm::mat4(1.0f);
     lightingShader.setMat4("model", model);
 
+
+
+
+  // ------------------------------------------ water ------------------------------------------ //
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMap);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapwater);
 
-    // render the cube
-    glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    size_t waterVertexCount = water.size()/8;
 
-    // also draw the lamp object
+    // render water
+    glBindVertexArray(waterVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(waterVertexCount));
+
+
+
+
+  // ------------------------------------------ dirt ------------------------------------------ //
+    // bind diffuse map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapdirt);
+
+    size_t dirtVertexCount = dirt.size()/8;
+
+    // render dirt
+    glBindVertexArray(dirtVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(dirtVertexCount));
+
+
+
+
+  // ------------------------------------------ grass ------------------------------------------ //
+    // bind diffuse map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapgrass);
+
+    size_t grassVertexCount = grass.size()/8;
+
+    // render grass
+    glBindVertexArray(grassVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(grassVertexCount));
+
+
+
+  // ------------------------------------------ stone ------------------------------------------ //
+    // bind diffuse map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapstone);
+
+    size_t stoneVertexCount = stone.size()/8;
+
+    // render stone
+    glBindVertexArray(stoneVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(stoneVertexCount));
+
+
+
+  // ------------------------------------------ wood ------------------------------------------ //
+    // bind diffuse map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapwood);
+
+    size_t woodVertexCount = wood.size()/8;
+
+    // render wood
+    glBindVertexArray(woodVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(woodVertexCount));
+
+
+
+  // ------------------------------------------ bridge ------------------------------------------ //
+    size_t bridgeVertexCount = bridge.size()/8;
+
+    // render bridge
+    glBindVertexArray(bridgeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(bridgeVertexCount));
+
+
+
+  // ------------------------------------------ leaves ------------------------------------------ //
+    // bind diffuse map
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapleaves);
+
+    size_t leavesVertexCount = leaves.size()/8;
+
+    // render leaves
+    glBindVertexArray(leavesVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(leavesVertexCount));
+
+
+
+
+
+  // ------------------------------------------ SUN ------------------------------------------ //
     lightCubeShader.use();
     lightCubeShader.setMat4("projection", projection);
     lightCubeShader.setMat4("view", view);
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+    // model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
     lightCubeShader.setMat4("model", model);
 
-    glBindVertexArray(lightCubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    size_t sunVertexCount = sun.size()/8;
+
+    glBindVertexArray(sunVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sunVertexCount));
 
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -231,12 +488,6 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightCubeVAO);
-    glDeleteBuffers(1, &VBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -338,4 +589,68 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   // make sure the viewport matches the new window dimensions; note that width and 
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+}
+
+std::vector<float> loadObjModel(const std::string& path) {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
+
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str());
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+
+  if (!ret) {
+    std::cerr << "Failed to load/parse .obj file!" << std::endl;
+    return {};
+  }
+
+  std::vector<float> vertices;
+  for (const auto& shape : shapes) {
+    for (const auto& index : shape.mesh.indices) {
+      // Vertex positions
+      tinyobj::real_t vx = attrib.vertices[3 * index.vertex_index + 0];
+      tinyobj::real_t vy = attrib.vertices[3 * index.vertex_index + 1];
+      tinyobj::real_t vz = attrib.vertices[3 * index.vertex_index + 2];
+      vertices.push_back(vx);
+      vertices.push_back(vy);
+      vertices.push_back(vz);
+
+      // Normals (if present)
+      if (index.normal_index >= 0) {
+        tinyobj::real_t nx = attrib.normals[3 * index.normal_index + 0];
+        tinyobj::real_t ny = attrib.normals[3 * index.normal_index + 1];
+        tinyobj::real_t nz = attrib.normals[3 * index.normal_index + 2];
+        vertices.push_back(nx);
+        vertices.push_back(ny);
+        vertices.push_back(nz);
+      } else {
+        // Fallback if normals are missing
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+
+      // Texture coordinates (if present)
+      if (index.texcoord_index >= 0) {
+        tinyobj::real_t tx = attrib.texcoords[2 * index.texcoord_index + 0];
+        tinyobj::real_t ty = attrib.texcoords[2 * index.texcoord_index + 1];
+        vertices.push_back(tx);
+        vertices.push_back(ty);
+      } else {
+        // Fallback if texture coordinates are missing
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
+      }
+    }
+  }
+
+  return vertices;
 }
