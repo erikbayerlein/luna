@@ -79,25 +79,19 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
 
 
+  // ------------------------------------------ water ------------------------------------------ //
 
-
-
-
-
-
-  // ------------------------------------------ WALL ------------------------------------------ //
-  
-  std::vector<float> wall = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/wall.obj");
+  std::vector<float> water = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/water.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int WallVBO, WallVAO;
-  glGenVertexArrays(1, &WallVAO);
-  glGenBuffers(1, &WallVBO);
+  unsigned int waterVBO, waterVAO;
+  glGenVertexArrays(1, &waterVAO);
+  glGenBuffers(1, &waterVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, WallVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &wall[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
+  glBufferData(GL_ARRAY_BUFFER, water.size() * sizeof(float), &water[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(WallVAO);
+  glBindVertexArray(waterVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -110,44 +104,29 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // second, configure the light's WallVAO (WallVBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-  unsigned int lightCubeWallVAO;
-  glGenVertexArrays(1, &lightCubeWallVAO);
-  glBindVertexArray(lightCubeWallVAO);
-
-  // we only need to bind to the WallVBO (to link it with glVertexAttribPointer), no need to fill it;
-  // the WallVBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-  glBindBuffer(GL_ARRAY_BUFFER, WallVBO);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapWall = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/wall.jpg");
-
-  // ------------------------------------------------------------------------------------------ //
+  unsigned int diffuseMapwater = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/water.jpeg");
 
 
 
 
 
 
+  // ------------------------------------------ dirt ------------------------------------------ //
 
-
-  // ------------------------------------------ SHELVES ------------------------------------------ //
-
-  std::vector<float> shelves = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/shelves.obj");
+  std::vector<float> dirt = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/dirt.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int shelvesVBO, shelvesVAO;
-  glGenVertexArrays(1, &shelvesVAO);
-  glGenBuffers(1, &shelvesVBO);
+  unsigned int dirtVBO, dirtVAO;
+  glGenVertexArrays(1, &dirtVAO);
+  glGenBuffers(1, &dirtVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, shelvesVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &shelves[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, dirtVBO);
+  glBufferData(GL_ARRAY_BUFFER, dirt.size() * sizeof(float), &dirt[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(shelvesVAO);
+  glBindVertexArray(dirtVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -162,69 +141,25 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapShelves = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/shelves.jpg");
-
-  // ------------------------------------------------------------------------------------------ //
+  unsigned int diffuseMapdirt = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/dirt.jpg");
 
 
 
 
 
+  // ------------------------------------------ grass ------------------------------------------ //
 
-
-
-
-
-  // ------------------------------------------ FLOOR bugando ------------------------------------------ //
-  //
-  // std::vector<float> floor = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/floor.obj");
-  //
-  // // first, configure the cube's VAO (and VBO)
-  // unsigned int floorVBO, floorVAO;
-  // glGenVertexArrays(1, &floorVAO);
-  // glGenBuffers(1, &floorVBO);
-  //
-  // glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
-  // glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &floor[0], GL_STATIC_DRAW);
-  //
-  // glBindVertexArray(floorVAO);
-  // // Position attribute
-  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  // glEnableVertexAttribArray(0);
-  //
-  // // Normal attribute
-  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  // glEnableVertexAttribArray(1);
-  //
-  // // Texture coordinate attribute
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  // glEnableVertexAttribArray(2);
-  //
-  // // load textures (we now use a utility function to keep the code more organized)
-  // // -----------------------------------------------------------------------------
-  // unsigned int diffuseMapfloor = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/floor.jpeg");
-
-  // ------------------------------------------------------------------------------------------ //
-
-
-
-
-
-
-
-  // ------------------------------------------ BED ------------------------------------------ //
-
-  std::vector<float> bed = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/bed.obj");
+  std::vector<float> grass = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/grass.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int bedVBO, bedVAO;
-  glGenVertexArrays(1, &bedVAO);
-  glGenBuffers(1, &bedVBO);
+  unsigned int grassVBO, grassVAO;
+  glGenVertexArrays(1, &grassVAO);
+  glGenBuffers(1, &grassVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, bedVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &bed[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+  glBufferData(GL_ARRAY_BUFFER, grass.size() * sizeof(float), &grass[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(bedVAO);
+  glBindVertexArray(grassVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -239,29 +174,25 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapbed = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/shelves.jpg");
-
-  // ------------------------------------------------------------------------------------------ //
+  unsigned int diffuseMapgrass = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/grass.jpg");
 
 
 
 
 
+  // ------------------------------------------ stone ------------------------------------------ //
 
-
-  // ------------------------------------------ MATTRESS ------------------------------------------ //
-
-  std::vector<float> mattress = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/mattress.obj");
+  std::vector<float> stone = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/stone.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int mattressVBO, mattressVAO;
-  glGenVertexArrays(1, &mattressVAO);
-  glGenBuffers(1, &mattressVBO);
+  unsigned int stoneVBO, stoneVAO;
+  glGenVertexArrays(1, &stoneVAO);
+  glGenBuffers(1, &stoneVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, mattressVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &mattress[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, stoneVBO);
+  glBufferData(GL_ARRAY_BUFFER, stone.size() * sizeof(float), &stone[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(mattressVAO);
+  glBindVertexArray(stoneVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -276,64 +207,25 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapmattress = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/mattress.jpg");
+  unsigned int diffuseMapstone = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/stone.jpg");
 
 
 
 
 
+  // ------------------------------------------ wood ------------------------------------------ //
 
-
-  // ------------------------------------------ pillow BUGANDO ------------------------------------------ //
-
-  // std::vector<float> pillow = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/pillow.obj");
-  //
-  // // first, configure the cube's VAO (and VBO)
-  // unsigned int pillowVBO, pillowVAO;
-  // glGenVertexArrays(1, &pillowVAO);
-  // glGenBuffers(1, &pillowVBO);
-  //
-  // glBindBuffer(GL_ARRAY_BUFFER, pillowVBO);
-  // glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &pillow[0], GL_STATIC_DRAW);
-  //
-  // glBindVertexArray(pillowVAO);
-  // // Position attribute
-  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  // glEnableVertexAttribArray(0);
-  //
-  // // Normal attribute
-  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  // glEnableVertexAttribArray(1);
-  //
-  // // Texture coordinate attribute
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  // glEnableVertexAttribArray(2);
-  //
-  // // load textures (we now use a utility function to keep the code more organized)
-  // // -----------------------------------------------------------------------------
-  // unsigned int diffuseMappillow = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/pillow.jpg");
-
-
-
-
-
-
-
-
-
-  // ------------------------------------------ box ------------------------------------------ //
-
-  std::vector<float> box = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/box.obj");
+  std::vector<float> wood = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/wood.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int boxVBO, boxVAO;
-  glGenVertexArrays(1, &boxVAO);
-  glGenBuffers(1, &boxVBO);
+  unsigned int woodVBO, woodVAO;
+  glGenVertexArrays(1, &woodVAO);
+  glGenBuffers(1, &woodVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &box[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, woodVBO);
+  glBufferData(GL_ARRAY_BUFFER, wood.size() * sizeof(float), &wood[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(boxVAO);
+  glBindVertexArray(woodVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -348,27 +240,52 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapbox = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/box.jpeg");
+  unsigned int diffuseMapwood = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/wood.jpeg");
 
 
 
 
 
+  // ------------------------------------------ bridge ------------------------------------------ //
 
-
-  // ------------------------------------------ baseLampshade ------------------------------------------ //
-
-  std::vector<float> baseLampshade = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/base_lampshade.obj");
+  std::vector<float> bridge = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/bridge.obj");
 
   // first, configure the cube's VAO (and VBO)
-  unsigned int baseLampshadeVBO, baseLampshadeVAO;
-  glGenVertexArrays(1, &baseLampshadeVAO);
-  glGenBuffers(1, &baseLampshadeVBO);
+  unsigned int bridgeVBO, bridgeVAO;
+  glGenVertexArrays(1, &bridgeVAO);
+  glGenBuffers(1, &bridgeVBO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, baseLampshadeVBO);
-  glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &baseLampshade[0], GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, bridgeVBO);
+  glBufferData(GL_ARRAY_BUFFER, bridge.size() * sizeof(float), &bridge[0], GL_STATIC_DRAW);
 
-  glBindVertexArray(baseLampshadeVAO);
+  glBindVertexArray(bridgeVAO);
+  // Position attribute
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // Normal attribute
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  // Texture coordinate attribute
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+
+
+
+  // ------------------------------------------ leaves ------------------------------------------ //
+
+  std::vector<float> leaves = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/leaves.obj");
+
+  // first, configure the cube's VAO (and VBO)
+  unsigned int leavesVBO, leavesVAO;
+  glGenVertexArrays(1, &leavesVAO);
+  glGenBuffers(1, &leavesVBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, leavesVBO);
+  glBufferData(GL_ARRAY_BUFFER, leaves.size() * sizeof(float), &leaves[0], GL_STATIC_DRAW);
+
+  glBindVertexArray(leavesVAO);
   // Position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -383,41 +300,30 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
   // load textures (we now use a utility function to keep the code more organized)
   // -----------------------------------------------------------------------------
-  unsigned int diffuseMapbaseLampshade = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/darkWood.jpeg");
+  unsigned int diffuseMapleaves = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/leaves.jpg");
+
+
+
+  // ------------------------------------------ sun ------------------------------------------ //
+  std::vector<float> sun = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/sun.obj");
+
+  unsigned int sunVAO, sunVBO;
+  glGenVertexArrays(1, &sunVAO);
+  glGenBuffers(1, &sunVBO);
+
+  glBindVertexArray(sunVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, sunVBO);
+  glBufferData(GL_ARRAY_BUFFER, sun.size() * sizeof(float), &sun[0], GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
 
 
 
 
-  // ------------------------------------------ lampshade BUGANDO ------------------------------------------ //
 
-  // std::vector<float> lampshade = loadObjModel("/Users/erikbayerlein/Documents/cg3d/src/resources/models/lampshade.obj");
-  //
-  // // first, configure the cube's VAO (and VBO)
-  // unsigned int lampshadeVBO, lampshadeVAO;
-  // glGenVertexArrays(1, &lampshadeVAO);
-  // glGenBuffers(1, &lampshadeVBO);
-  //
-  // glBindBuffer(GL_ARRAY_BUFFER, lampshadeVBO);
-  // glBufferData(GL_ARRAY_BUFFER, wall.size() * sizeof(float), &lampshade[0], GL_STATIC_DRAW);
-  //
-  // glBindVertexArray(lampshadeVAO);
-  // // Position attribute
-  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  // glEnableVertexAttribArray(0);
-  //
-  // // Normal attribute
-  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  // glEnableVertexAttribArray(1);
-  //
-  // // Texture coordinate attribute
-  // glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  // glEnableVertexAttribArray(2);
-  //
-  // // load textures (we now use a utility function to keep the code more organized)
-  // // -----------------------------------------------------------------------------
-  // unsigned int diffuseMaplampshade = loadTexture("/Users/erikbayerlein/Documents/cg3d/src/resources/textures/lampshade.jpg");
-
-
+  glEnable(GL_CULL_FACE);
 
 
   // shader configuration
@@ -441,7 +347,7 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
     // render
     // ------
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.902f, 0.945f, 0.847f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // be sure to activate shader when setting uniforms/drawing objects
@@ -456,7 +362,7 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
 
     // material properties
     lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    lightingShader.setFloat("material.shininess", 24.0f);
+    lightingShader.setFloat("material.shininess", 128.0f);
 
     // view/projection transformations
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -469,186 +375,112 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
     lightingShader.setMat4("model", model);
 
 
-  // ------------------------------------------ WALL ------------------------------------------ //
+
+
+  // ------------------------------------------ water ------------------------------------------ //
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapWall);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapwater);
 
-    size_t vertexCount = wall.size()/8;
+    size_t waterVertexCount = water.size()/8;
 
-    // render wall
-    glBindVertexArray(WallVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
+    // render water
+    glBindVertexArray(waterVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(waterVertexCount));
 
 
-  // ------------------------------------------ SHELVES ------------------------------------------ //
-    // Bind the diffuse map for the second object
+
+
+  // ------------------------------------------ dirt ------------------------------------------ //
+    // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapShelves);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapdirt);
 
-    // Model transformation for the second object
-    // glm::mat4 model2 = glm::mat4(1.0f);
-    // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // lightingShader.setMat4("model", model2);
+    size_t dirtVertexCount = dirt.size()/8;
 
-    size_t shelvesVertexCount = shelves.size() / 8;
-
-    // Render the second object
-    glBindVertexArray(shelvesVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(shelvesVertexCount));
-    
+    // render dirt
+    glBindVertexArray(dirtVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(dirtVertexCount));
 
 
 
-  // ------------------------------------------ FLOOR ------------------------------------------ //
-    // Bind the diffuse map for the second object
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, diffuseMapfloor);
-    //
-    // // Model transformation for the second object
-    // // glm::mat4 model2 = glm::mat4(1.0f);
-    // // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // // lightingShader.setMat4("model", model2);
-    //
-    // size_t floorVertexCount = floor.size() / 8;
-    //
-    // // Render the second object
-    // glBindVertexArray(floorVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(floorVertexCount));
 
-
-
-  // ------------------------------------------ BED ------------------------------------------ //
-    // Bind the diffuse map for the second object
+  // ------------------------------------------ grass ------------------------------------------ //
+    // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapbed);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapgrass);
 
-    // Model transformation for the second object
-    // glm::mat4 model2 = glm::mat4(1.0f);
-    // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // lightingShader.setMat4("model", model2);
+    size_t grassVertexCount = grass.size()/8;
 
-    size_t bedVertexCount = bed.size() / 8;
-
-    // Render the second object
-    glBindVertexArray(bedVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(bedVertexCount));
+    // render grass
+    glBindVertexArray(grassVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(grassVertexCount));
 
 
 
-  // ------------------------------------------ MATTRESS ------------------------------------------ //
-    // Bind the diffuse map for the second object
+  // ------------------------------------------ stone ------------------------------------------ //
+    // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapmattress);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapstone);
 
-    // Model transformation for the second object
-    // glm::mat4 model2 = glm::mat4(1.0f);
-    // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // lightingShader.setMat4("model", model2);
+    size_t stoneVertexCount = stone.size()/8;
 
-    size_t mattressVertexCount = mattress.size() / 8;
-
-    // Render the second object
-    glBindVertexArray(mattressVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(mattressVertexCount));
+    // render stone
+    glBindVertexArray(stoneVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(stoneVertexCount));
 
 
 
-
-
-
-  // ------------------------------------------ PILLOW ------------------------------------------ //
-    // // Bind the diffuse map for the second object
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, diffuseMappillow);
-    //
-    // // Model transformation for the second object
-    // // glm::mat4 model2 = glm::mat4(1.0f);
-    // // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // // lightingShader.setMat4("model", model2);
-    //
-    // size_t pillowVertexCount = pillow.size() / 8;
-    //
-    // // Render the second object
-    // glBindVertexArray(pillowVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(pillowVertexCount));
-
-
-
-  // ------------------------------------------ box ------------------------------------------ //
-    // Bind the diffuse map for the second object
+  // ------------------------------------------ wood ------------------------------------------ //
+    // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapbox);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapwood);
 
-    // Model transformation for the second object
-    // glm::mat4 model2 = glm::mat4(1.0f);
-    // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // lightingShader.setMat4("model", model2);
+    size_t woodVertexCount = wood.size()/8;
 
-    size_t boxVertexCount = box.size() / 8;
-
-    // Render the second object
-    glBindVertexArray(boxVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(boxVertexCount));
+    // render wood
+    glBindVertexArray(woodVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(woodVertexCount));
 
 
 
+  // ------------------------------------------ bridge ------------------------------------------ //
+    size_t bridgeVertexCount = bridge.size()/8;
 
-  // ------------------------------------------ baseLampshade ------------------------------------------ //
-    // Bind the diffuse map for the second object
+    // render bridge
+    glBindVertexArray(bridgeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(bridgeVertexCount));
+
+
+
+  // ------------------------------------------ leaves ------------------------------------------ //
+    // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMapbaseLampshade);
+    glBindTexture(GL_TEXTURE_2D, diffuseMapleaves);
 
-    // Model transformation for the second object
-    // glm::mat4 model2 = glm::mat4(1.0f);
-    // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // lightingShader.setMat4("model", model2);
+    size_t leavesVertexCount = leaves.size()/8;
 
-    size_t baseLampshadeVertexCount = baseLampshade.size() / 8;
-
-    // Render the second object
-    glBindVertexArray(baseLampshadeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(baseLampshadeVertexCount));
+    // render leaves
+    glBindVertexArray(leavesVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(leavesVertexCount));
 
 
 
 
 
-
-  // ------------------------------------------ lampshade ------------------------------------------ //
-    // // Bind the diffuse map for the second object
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, diffuseMaplampshade);
-    //
-    // // Model transformation for the second object
-    // // glm::mat4 model2 = glm::mat4(1.0f);
-    // // model2 = glm::translate(model2, glm::vec3(2.0f, 0.0f, 0.0f)); // Move the second object
-    // // lightingShader.setMat4("model", model2);
-    //
-    // size_t lampshadeVertexCount = lampshade.size() / 8;
-    //
-    // // Render the second object
-    // glBindVertexArray(lampshadeVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(lampshadeVertexCount));
-
-
-
-
-
-
-
-
-  // ------------------------------------------ LAMP ------------------------------------------ //
+  // ------------------------------------------ SUN ------------------------------------------ //
     lightCubeShader.use();
     lightCubeShader.setMat4("projection", projection);
     lightCubeShader.setMat4("view", view);
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+    // model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
     lightCubeShader.setMat4("model", model);
 
-    glBindVertexArray(lightCubeWallVAO);
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
+    size_t sunVertexCount = sun.size()/8;
+
+    glBindVertexArray(sunVAO);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sunVertexCount));
 
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -656,12 +488,6 @@ GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Luna", NULL, NULL)
     glfwSwapBuffers(window);
     glfwPollEvents();
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    // glDeleteVertexArrays(1, &WallVAO);
-    // glDeleteVertexArrays(1, &lightCubeWallVAO);
-    // glDeleteBuffers(1, &WallVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
