@@ -1,3 +1,4 @@
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
@@ -6,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "glm/fwd.hpp"
 #include "shaders/shader.h"
 #include "camera/Camera.h"
 #include "tinyobjloader/tiny_obj_loader.h"
@@ -32,7 +34,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // lighting
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(-1.0f, 1.2f, 0.8f);
 
 
 int main() {
@@ -473,12 +475,21 @@ int main() {
     lightCubeShader.setMat4("projection", projection);
     lightCubeShader.setMat4("view", view);
     model = glm::mat4(1.0f);
+
+    glm::vec3 orbit = glm::vec3(-2.0f, 0.0f, 0.0f);
+
+    float orbitRadius = 4.0f;
+    float orbitSpeed = glfwGetTime() * 1.4f;
+
+    float lightZ = orbitRadius * cos(orbitSpeed);
+    float lightY = orbitRadius * sin(orbitSpeed);
+    lightPos = glm::vec3(0.0f, lightY, lightZ);
+
     model = glm::translate(model, lightPos);
-    // model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+
     lightCubeShader.setMat4("model", model);
 
     size_t sunVertexCount = sun.size()/8;
-
     glBindVertexArray(sunVAO);
     glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(sunVertexCount));
 
