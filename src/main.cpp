@@ -362,10 +362,6 @@ int main() {
     lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-    // material properties
-    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    lightingShader.setFloat("material.shininess", 128.0f);
-
     // view/projection transformations
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
@@ -384,6 +380,10 @@ int main() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapwater);
 
+    // material properties
+    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    lightingShader.setFloat("material.shininess", 128.0f);
+
     size_t waterVertexCount = water.size()/8;
 
     // render water
@@ -397,6 +397,10 @@ int main() {
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapdirt);
+
+    // material properties
+    lightingShader.setVec3("material.specular", 0.3f, 0.3f, 0.3f);
+    lightingShader.setFloat("material.shininess", 16.0f);
 
     size_t dirtVertexCount = dirt.size()/8;
 
@@ -412,6 +416,10 @@ int main() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapgrass);
 
+    // material properties
+    lightingShader.setVec3("material.specular", 0.4f, 0.4f, 0.4f);
+    lightingShader.setFloat("material.shininess", 32.0f);
+
     size_t grassVertexCount = grass.size()/8;
 
     // render grass
@@ -425,6 +433,10 @@ int main() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapstone);
 
+    // material properties
+    lightingShader.setVec3("material.specular", 0.1f, 0.1f, 0.1f);
+    lightingShader.setFloat("material.shininess", 8.0f);
+
     size_t stoneVertexCount = stone.size()/8;
 
     // render stone
@@ -437,6 +449,10 @@ int main() {
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapwood);
+
+    // material properties
+    lightingShader.setVec3("material.specular", 0.3f, 0.2f, 0.2f);
+    lightingShader.setFloat("material.shininess", 24.0f);
 
     size_t woodVertexCount = wood.size()/8;
 
@@ -459,6 +475,10 @@ int main() {
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMapleaves);
+
+    // material properties
+    lightingShader.setVec3("material.specular", 0.2f, 0.3f, 0.2f);
+    lightingShader.setFloat("material.shininess", 16.0f);
 
     size_t leavesVertexCount = leaves.size()/8;
 
