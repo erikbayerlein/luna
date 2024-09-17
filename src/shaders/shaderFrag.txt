@@ -1,7 +1,0 @@
-"#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "in vec3 ourColor;\n" // a way to pass data from our app on the CPU to the shaders on the GPU
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(ourColor, 1.0);\n"
-    "}\n\0";

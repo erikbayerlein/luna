@@ -1,7 +1,17 @@
 .DS_Store
 
+/src/glad.c
+/src/stb_image.cpp
+
 /out
 /.cache
-/dependencies
+
+/dependencies/include/assimp
+/dependencies/include/glad
+/dependencies/include/GLFW
+/dependencies/include/glm
+/dependencies/include/KHR
+/dependencies/include/tinyobjloader
+/dependencies/include/stb_image.h
 
 compile_commands.json

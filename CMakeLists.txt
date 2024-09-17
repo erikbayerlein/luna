@@ -13,6 +13,8 @@ add_executable(${PROJECT_NAME}
   src/glad.c
   src/stb_image.cpp
   dependencies/include/tinyobjloader/tiny_obj_loader.cc
+  src/render/RenderLight.cpp
+  src/render/RenderObject.cpp
   # src/obj.cpp
 )
 
