@@ -184,6 +184,7 @@ int main() {
     leaves.render(objectShader);
     bridge.render(objectShader);
 
+    sun.renderSun(projection, view, lightShader);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
